@@ -99,20 +99,20 @@ Then push it a docker hub:
 
 Note that, by default Kubernetes looks in the public Docker registry to find images. If your image doesn't exist there it won't be able to pull it. We can also use our local or a private image repository but for simplicity we will just use a public docker hub image repository.
 
-## STEP 3: Container Orchestration using Kubernates 
+## STEP 3: Container Orchestration using Kubernetes 
 
-This project has a reference yml file that can be use to deploy the Docker contaioners (from STEP 2) in Kubernates.
+This project has a reference yml file that can be use to deploy the Docker contaioners (from STEP 2) in Kubernetes.
 
-In part 2, we have launched a single container using the image we have created for our simple react app. That is fine for our local/development environment but how would we manage the containers for production workloads? If required, how will we scale our react app image into thousands of containers? Enter Kubernates. Kubernates in essence is a Container Orchestration Platform. 
+In part 2, we have launched a single container using the image we have created for our simple react app. That is fine for our local/development environment but how would we manage the containers for production workloads? If required, how will we scale our react app image into thousands of containers? Enter Kubernetes. Kubernetes in essence is a Container Orchestration Platform. 
 
-You need to have Docker and Kubernates running locally for this part. 
-There are various option to deploy to kubernates (all major public cloud provider has kubernates engine where you can deploy). However, one simple option is using the Kubernates engine that comes with Docker (you need to enable it from Docker Desktop if you have not already) and that’s what we will be using here: 
+You need to have Docker and Kubernetes running locally for this part. 
+There are various option to deploy to Kubernetes (all major public cloud provider has Kubernetes engine where you can deploy). However, one simple option is using the Kubernetes engine that comes with Docker (you need to enable it from Docker Desktop if you have not already) and that’s what we will be using here: 
 https://www.docker.com/products/kubernetes 
 
 Now, in the root of your project, verify a file name deployment.yml and contents of it. 
 Few things to note about the deployment.yml file:
 
-- Metadata and labels can be anything but if you are building a full stack applications then it is important to note as Kubernates uses these metadata to puts applications together. 
+- Metadata and labels can be anything but if you are building a full stack applications then it is important to note as Kubernetes uses these metadata to puts applications together. 
 
 - We are creating 2 container (replicas) from our image. 
 
@@ -122,14 +122,14 @@ Few things to note about the deployment.yml file:
 
 - You can use the resources as specific here for POC purpose but if you are using this for production you may like to to review this.
 
-- Finally, livenessProbe and readinessProbe arevpart of Kubernates auto healing  mechanism and one of many reasons that makes kubernates a great container orchestration tool. Kubernates uses liveness probes to know when to restart a container. Whereas readinessProbe allows applications to have extra time to get ready to be added to the cluster i.e. an application might need to load large data or configuration files during startup, or depend on external services after startup. 
+- Finally, livenessProbe and readinessProbe arevpart of Kubernetes auto healing  mechanism and one of many reasons that makes Kubernetes a great container orchestration tool. Kubernetes uses liveness probes to know when to restart a container. Whereas readinessProbe allows applications to have extra time to get ready to be added to the cluster i.e. an application might need to load large data or configuration files during startup, or depend on external services after startup. 
 
 Please read more about the deployment file here:
 
 https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
-Now, we can use this deployment file with the Kubernates CLI (kubectl) to deploy our Containers into a Kubernares cluster. 
+Now, we can use this deployment file with the Kubernetes CLI (kubectl) to deploy our Containers into a Kubernares cluster. 
 (Note: you can deploy as pods as well but deployment is a preferred approach)
 ### `kubectl apply -f deployment.yml`
 
@@ -156,7 +156,7 @@ You can exit the terminal once done.
 You can also use port forward on the PODS as well.
 ### `kubectl port-forward pod/react-docker-k8s-xxxxxxxxxx-xxxxx 8080:80`
 
-Now, lets try out the autohealing feature of Kubernates. 
+Now, lets try out the autohealing feature of Kubernetes. 
 Lets elete one of the pod from our cluster (out of 2 we have created using our deployment.yml file): 
 ### `kubectl delete pod/react-docker-k8s-xxxxxxxxxx-xxxxx`
 
