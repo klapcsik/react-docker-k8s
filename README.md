@@ -72,85 +72,93 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/tr
 This project has Containerization support using Docker: 
 
 Note: you need to have Docker running locally for the commands to work. 
+
 To get started with Docker: https://www.docker.com/get-started
 
 In the project directory where the Dockerfile is located, you can run following to build a container with a nginx web server:
-
 ### `docker build -t react-docker-k8s .`
 
 This will create an image with the react app running in an nginx web server. 
-Now, we can run a container based on this image:
 
+Now, we can run a container based on this image:
 ### `docker run -it -p 3000:80 --rm react-docker-k8s:latest`
 
+We can ignore the warnings in the console: 10-listen-on-ipv6-by-default.sh: error: /etc/nginx/conf.d/default.conf is not a file or does not exist (this is because we have modified that to make our react router work - you can verify that in nginx/nginx.conf file).  Since we are pointing our local port 3000 to container port 80, we can open the react app by browsing to http://localhost:3000 
 
-You can ignore the warnings in the console: 10-listen-on-ipv6-by-default.sh: error: /etc/nginx/conf.d/default.conf is not a file or does not exist (this is because we modified that to make react router) 
-Since we are pointing our local port 3000 to container port 80, we can open the react by browsing to http://localhost:3000 
+We have a react app running as a docker container! 
 
-We have a react app running as a docker container! In our terminal, we should see HTTP traffic from our browser to our container.  Before we conclude the docker part, one important concept to understand is  the difference  between a Docker image and a Docker container.  Metaphorically, an image is a recipe whereas container is the cake. So just like you can make many cakes using the same recipe, you can have many running containers of the same image. 
+In our terminal, we should see HTTP traffic from our browser to our container.  Before we conclude the docker part, one important concept to understand is the difference  between a Docker image and a Docker container.  Metaphorically, an image is a recipe whereas container is the cake. So just like you can make many cakes using the same recipe, you can have many running containers of the same image. 
 
-Finally, lets push the docker container image to our public docker hub. Note that, by default Kubernetes looks in the public Docker registry to find images. If your image doesn't exist there it won't be able to pull it. You can also use your local or a private image repository but for simplicity  we will use a public docker hub image repository.
+Finally, lets push the docker container image to our public docker hub repository. 
 
-First lets tag our image: 
-
+First, lets tag our image: 
 ### `docker tag react-docker-k8s [your public docker hub repository name]/react-docker-k8s`
 
 Then push it a docker hub: 
-
 ### `docker push [your public docker hub repository name]/react-docker-k8s`
 
+Note that, by default Kubernetes looks in the public Docker registry to find images. If your image doesn't exist there it won't be able to pull it. We can also use our local or a private image repository but for simplicity we will just use a public docker hub image repository.
 
 ## STEP 3: Container Orchestration using Kubernates 
 
-This project has reference yml files that can be use to deploy the Docker contaioners (from STEP 2) in Kubernates.
+This project has a reference yml file that can be use to deploy the Docker contaioners (from STEP 2) in Kubernates.
 
-In part 2, we have launched a single container using the image we have created for our simple react app. That is fine for our local/development but how would we manage the containers for production workloads? If required, how will we scale our react app image into thousands of containers? Enter Kubernates. Kubernates in essence is a Container Orchestration Platform. 
-You need to have Docker and Kubernates running locally for this part. There are various option to deploy to kubernates (all major public cloud provider has kubernates engine where you can deploy). However, one simple option is using the Kubernates engine that comes with Docker (you need to enable it from Docker Desktop if you have not already) and that’s what we will be using here: https://www.docker.com/products/kubernetes 
+In part 2, we have launched a single container using the image we have created for our simple react app. That is fine for our local/development environment but how would we manage the containers for production workloads? If required, how will we scale our react app image into thousands of containers? Enter Kubernates. Kubernates in essence is a Container Orchestration Platform. 
 
-Now, in the root of your project, verify a file name deployment.yml 
+You need to have Docker and Kubernates running locally for this part. 
+There are various option to deploy to kubernates (all major public cloud provider has kubernates engine where you can deploy). However, one simple option is using the Kubernates engine that comes with Docker (you need to enable it from Docker Desktop if you have not already) and that’s what we will be using here: 
+https://www.docker.com/products/kubernetes 
 
-We can use this deployment file with the Kubernates CLI (kubectl) to deploy our Containers into a Kubernares cluster. 
+Now, in the root of your project, verify a file name deployment.yml and contents of it. 
+Few things to note about the deployment.yml file:
 
-Few things to note: 
-Metadata and labels can be anything but if you are building a full stack applications then it is important as Kubernates uses these metadata to puts applications together. 
-We are creating 2 container (replicas) from our image. 
-For image, we are using the image we have created and pushed to our docker hub in Part 2 (please make sure to update this).
-We are opening Port 80 of our container to outside world. Port 80 is a common industry practice to open up for web traffic and recalls that part of our NGINX configuration we are listening to Port 80. 
-You can use the resources as specific here for POC purpose but if you are using this for production you may like to to review this.
-livenessProbe and readinessProbe part of Kubernates autodialing mechajnis and one of many reasons that makes Kuberbaresy a great container orchestration tool.  
-Kubernates uses liveness probes to know when to restart a container. Whereas readinessProbe allows applications to have extra time to get ready to be added to the cluster i.e. an application might need to load large data or configuration files during startup, or depend on external services after startup\.
+- Metadata and labels can be anything but if you are building a full stack applications then it is important to note as Kubernates uses these metadata to puts applications together. 
 
-Please read more about this here:
+- We are creating 2 container (replicas) from our image. 
+
+- For image, we are using the image we have created and pushed to our docker hub in Part 2.
+
+- We are opening Port 80 of our container to outside world. Port 80 is a common industry practice to open up for web traffic and if you review the nginx/nginx.conf file in our repo you will see that we are listening to Port 80. 
+
+- You can use the resources as specific here for POC purpose but if you are using this for production you may like to to review this.
+
+- Finally, livenessProbe and readinessProbe arevpart of Kubernates auto healing  mechanism and one of many reasons that makes kubernates a great container orchestration tool. Kubernates uses liveness probes to know when to restart a container. Whereas readinessProbe allows applications to have extra time to get ready to be added to the cluster i.e. an application might need to load large data or configuration files during startup, or depend on external services after startup. 
+
+Please read more about the deployment file here:
 
 https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
 https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 
-Deploy the docker container in a kubernates cluster using deployment: (Note: you can deploy as pods as well but deployment is a preferred approach)
-
+Now, we can use this deployment file with the Kubernates CLI (kubectl) to deploy our Containers into a Kubernares cluster. 
+(Note: you can deploy as pods as well but deployment is a preferred approach)
 ### `kubectl apply -f deployment.yml`
-Verify the deployment was successful:
 
+Verify the deployment was successful 
 ### `kubectl get deployment`
-We should see the app we have deoployed. 
+We should see the app we have deployed. 
 
-Verify the pods with REACT container images are running:
+Verify the pods with react app container images are running:
 ### `kubectl get pods`
 
-Verify a pod with REACT container is configured & deployed correctly:
+Verify a pod with react container is configured & deployed correctly:
 ### `kubectl describe pod react-docker-k8s-xxxxxxxxxx-xxxxx`
 
-You can also ssh into the container pod to verify the REACT app contents:
+You can also ssh into the container pod to verify the react app contents:
 ### `kubectl exec react-docker-k8s-xxxxxxxxxx-xxxxx -it sh`
-Navigate to /usr/share/nginx/html folder where we should see the contents from build folder of our REACT app (from STEP 1). 
+Navigate to /usr/share/nginx/html folder where we should see the contents from build folder of our react app (from STEP 1). 
 
 Verify the REACT app is working correctly: (Note: here we are simply binding a port from our local machine port 8080 to container port 80)
 ### `kubectl port-forward deployment/react-docker-k8s 8080:80`
 
-Open http://localhost:8080 to view the React app in the browser.
+Open http://localhost:8080 to view the React app in the browser.
 You can exit the terminal once done.
 
 You can also use port forward on the PODS as well.
 ### `kubectl port-forward pod/react-docker-k8s-xxxxxxxxxx-xxxxx 8080:80`
 
-Finaally, to deploy the application into a production workload, you can use Kubernates Service:(https://kubernetes.io/docs/concepts/services-networking/service/)
+Now, lets try out the autohealing feature of Kubernates. 
+Lets elete one of the pod from our cluster (out of 2 we have created using our deployment.yml file): 
+### `kubectl delete pod/react-docker-k8s-xxxxxxxxxx-xxxxx`
 
+Now, watch how kuberantes autoheal our cluster and automatically build a POD to replace the delelted POD! 
+### `kubectl get deployment --watch`
